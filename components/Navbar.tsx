@@ -61,11 +61,10 @@ const NavBar: React.FC<{ locale: string }> = ({ locale }) => {
     <div className="fixed top-0 left-0 w-full z-50">
 
       {/* PREHEADER always present but HIDDEN at initial */}
-      <div className={`${isScrolled ? "block" : "hidden"} sm:block`}>
-        <div
-          className={`bg-black text-white h-[57px] py-[14px] px-[65px] font-urbanist md:flex justify-center transition-all duration-300`}
-          style={{ display: displayStyle }}
-        >
+      
+<div className={`${isScrolled ? "block" : "hidden"}`}>
+   {/* === paste your full preheader HERE again unchanged === */}
+   <div className={`bg-black text-white h-[57px] py-[14px] px-[65px] font-urbanist md:flex justify-center transition-all duration-300`} style={{ display: displayStyle }}>
           <div className="flex justify-center sm:justify-between items-center text-xs md:text-sm w-full max-w-[1270px] mx-auto">
             <div className="hidden sm:block">
               <div className="flex gap-4">
