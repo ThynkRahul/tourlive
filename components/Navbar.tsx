@@ -165,7 +165,7 @@ const navLinks = [
         >
           {/* Logo */}
           <div className="navbar-start px-4 flex items-center" style={{ marginTop: "-10px" }}>
-            <Link href={`/${locale}`} legacyBehavior>
+            <Link href={prefix || "/"} legacyBehavior>
               <a onClick={() => handleLinkClick(`/${locale}`)}>
                 <Image src={logo} width={128} height={48} alt="Logo" />
               </a>
@@ -222,7 +222,7 @@ const navLinks = [
               ))}
 
               {/* Add Contact Us only in Mobile Menu */}
-              <Link href={`/${locale}/contact`} passHref>
+              <Link href={`${prefix}/contact`} passHref>
                 <button
                   className={`btn btn-ghost btn-sm text-[16px] rounded-btn ${activePage === `/${locale}/contact` ? "text-[#6E9753]" : "text-[#025C7A]"}`}
                 >
@@ -239,7 +239,7 @@ const navLinks = [
 
           {/* Contact Us Button (Desktop) */}
           <div className="navbar-end md:flex px-4 hidden">
-            <Link href={`/${locale}/contact`} passHref>
+            <Link href={`${prefix}/contact`} passHref>
               <button
                 onClick={handleContactClick}
                 className="btn flex items-center justify-center min-w-[173px] h-[46px] rounded-[41px] bg-[#025C7A] pr-[6px] pl-[10px] hover:bg-[#6E9753]"
