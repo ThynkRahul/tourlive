@@ -9,30 +9,28 @@ import { getLandingTranslations } from "../lib/translationHelper";
 const SCROLL_THRESHOLD = 130;
 
 const NavBar: React.FC<{ locale: string }> = ({ locale }) => {
-  // displayStyle controls whether navbar is visible ("block") or hidden ("none")
+  // controls whether navbar is rendered ("block") or hidden ("none")
   const [displayStyle, setDisplayStyle] = useState<"block" | "none">("block");
 
   // active path for highlighting
   const [activePage, setActivePage] = useState("");
 
-  // mobile menu
+  // mobile menu open
   const [isMenuOpen, setIsMenuOpen] = useState(false);
 
   // preheader (black top bar) visibility
   const [isPreheaderVisible, setIsPreheaderVisible] = useState(false);
 
-  // navbar background mode: "transparent" (floating) or "white" (solid)
-  // Initial requirement: English (locale === 'en') starts transparent; others start white
-  const [navbarMode, setNavbarMode] = useState<"transparent" | "white">(
-    locale === "en" ? "transparent" : "white"
-  );
+  // navbar background mode: "transparent" or "white"
+  // PER YOUR LAST MESSAGE: initial = transparent FOR ALL LOCALES
+  const [navbarMode, setNavbarMode] = useState<"transparent" | "white">("transparent");
 
-  // last scroll top tracked in ref to avoid stale closures
+  // track last scroll top in ref to avoid stale closure problems
   const lastScrollTopRef = useRef<number>(0);
 
   const { navigation } = getLandingTranslations(locale);
 
-  // prefix logic: english = no prefix, others keep /{lang}
+  // prefix logic: english = no prefix (root), others keep /{lang}
   const prefix = locale === "en" ? "" : `/${locale}`;
 
   const navLinks = [
@@ -44,48 +42,42 @@ const NavBar: React.FC<{ locale: string }> = ({ locale }) => {
     { href: `${prefix}/blog`, label: navigation.links.blog },
   ];
 
-  // set initial active path on mount
+  // set initial active path and baseline scroll on mount
   useEffect(() => {
     if (typeof window !== "undefined") {
       setActivePage(window.location.pathname);
-      // baseline last scroll for correct direction detection
       lastScrollTopRef.current = window.pageYOffset || document.documentElement.scrollTop;
-      // ensure navbar visible initially (though may be transparent for en)
-      setDisplayStyle("block");
-      // preheader hidden initially
-      setIsPreheaderVisible(false);
-      // navbarMode already initialized by locale; do not force white for EN here
+      setDisplayStyle("block"); // ensure navbar element is visible (may be transparent)
+      setIsPreheaderVisible(false); // preheader hidden initially
+      setNavbarMode("transparent"); // initial transparent for all locales per your last instruction
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
-  // Unified scroll handler: controls show/hide and preheader + navbar mode changes
+  // Unified scroll handler controlling navbar visibility, navbar background, and preheader
   const handleScroll = () => {
     const scrollTop = window.pageYOffset || document.documentElement.scrollTop;
     const lastScrollTop = lastScrollTopRef.current;
 
-    // Scrolling down and past threshold => hide navbar, keep preheader hidden
+    // Scrolling down AND beyond threshold -> hide navbar (both nav + preheader hidden while scrolling down)
     if (scrollTop > lastScrollTop && scrollTop > SCROLL_THRESHOLD) {
       setDisplayStyle("none");
       setIsPreheaderVisible(false);
-      // do not change navbarMode here (we want it to become white only when showing)
+      // do NOT change navbarMode here — it will become white on next show (scroll up)
     } else {
-      // Scrolling up (or not past threshold) -> show navbar
+      // Scrolling up OR not past threshold -> show navbar
       setDisplayStyle("block");
 
-      // When we show navbar on scroll-up, it should be white (per requirement).
-      // Also, if the page is still scrolled beyond threshold, show preheader.
+      // When showing on scroll-up, navbar becomes white
       setNavbarMode("white");
 
+      // If still beyond threshold, show preheader; else hide it
       if (scrollTop > SCROLL_THRESHOLD) {
         setIsPreheaderVisible(true);
       } else {
         setIsPreheaderVisible(false);
-        // If we are near the top and locale is EN, keep transparent (initial behavior).
-        // However per requirement: when user scrolls up, english also becomes white.
-        // We only restore transparent when user is near top AND we haven't scrolled-up to show white.
-        // We'll keep this: if user returns to top (<= threshold), we make EN transparent again.
-        if (scrollTop <= SCROLL_THRESHOLD && locale === "en") {
+        // If near top (<= threshold) and user is at top, revert navbar to transparent
+        if (scrollTop <= SCROLL_THRESHOLD) {
           setNavbarMode("transparent");
         }
       }
@@ -94,13 +86,12 @@ const NavBar: React.FC<{ locale: string }> = ({ locale }) => {
     lastScrollTopRef.current = scrollTop <= 0 ? 0 : scrollTop;
   };
 
-  // attach scroll handler (applies to mobile + desktop)
+  // Attach unified scroll listener for mobile + desktop
   useEffect(() => {
     if (typeof window === "undefined") return;
-
     window.addEventListener("scroll", handleScroll, { passive: true });
     return () => window.removeEventListener("scroll", handleScroll);
-    // we intentionally do not include lastScrollTopRef in deps
+    // lastScrollTopRef intentionally not in deps
   }, []);
 
   const handleLinkClick = (href: string) => {
@@ -112,15 +103,12 @@ const NavBar: React.FC<{ locale: string }> = ({ locale }) => {
     setActivePage("");
   };
 
-  // helper to compute navbar classes based on current mode
-  const navbarBgClass =
-    navbarMode === "transparent"
-      ? "bg-transparent border-none"
-      : "bg-white border-b border-gray-300";
+  // navbar background classes based on mode
+  const navbarBgClass = navbarMode === "transparent" ? "bg-transparent border-none" : "bg-white border-b border-gray-300";
 
   return (
     <div className="fixed top-0 left-0 w-full z-50">
-      {/* PRE-HEADER (black top bar). Visible only when isPreheaderVisible */}
+      {/* PRE-HEADER (black top bar) - visible only when isPreheaderVisible is true */}
       <div className={`${isPreheaderVisible ? "block" : "hidden"} sm:block`}>
         <div
           className={`bg-black text-white h-[57px] py-[14px] px-[65px] font-urbanist md:flex justify-center transition-all duration-300`}
@@ -200,7 +188,7 @@ const NavBar: React.FC<{ locale: string }> = ({ locale }) => {
         </div>
       </div>
 
-      {/* NAVBAR (white or transparent depending on navbarMode). Visible controlled by displayStyle */}
+      {/* NAVBAR (white or transparent depending on navbarMode) */}
       <div
         className={`flex items-center w-full font-urbanist h-[78px] transition-all duration-300 ${navbarBgClass}`}
         style={{ display: displayStyle }}
@@ -215,7 +203,7 @@ const NavBar: React.FC<{ locale: string }> = ({ locale }) => {
             </Link>
           </div>
 
-          {/* Hamburger */}
+          {/* Mobile hamburger */}
           <div className="md:hidden flex items-center pr-3 relative z-50">
             <button onClick={() => setIsMenuOpen(!isMenuOpen)} className="text-[#025C7A]">
               <i className={`fas ${isMenuOpen ? "fa-times" : "fa-bars"} text-xl`} />
