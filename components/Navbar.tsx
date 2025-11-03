@@ -6,56 +6,22 @@ import logo from "../public/images/logo.png";
 import LanguageSelector from "./LanguageSelector";
 import { getLandingTranslations } from "../lib/translationHelper";
 
+const SCROLL_THRESHOLD = 130;
+
 const NavBar: React.FC<{ locale: string }> = ({ locale }) => {
+  // nav show/hide (white navbar)
   const [displayStyle, setDisplayStyle] = useState<"block" | "none">("block");
+  // active path for highlighting
   const [activePage, setActivePage] = useState("");
   const [isMenuOpen, setIsMenuOpen] = useState(false);
+  // used to detect scroll direction
   const [lastScrollTop, setLastScrollTop] = useState(0);
-  const [isScrolled, setIsScrolled] = useState(false);
+  // preheader visibility (black top bar)
+  const [isPreheaderVisible, setIsPreheaderVisible] = useState(false);
+
   const { navigation } = getLandingTranslations(locale);
 
-  // scroll watch (pre header)
-  useEffect(() => {
-    const handleScroll = () => {
-      if (window.scrollY > 130) {
-        setIsScrolled(true);
-      } else {
-        setIsScrolled(false);
-      }
-    };
-
-    window.addEventListener("scroll", handleScroll);
-    return () => window.removeEventListener("scroll", handleScroll);
-  }, []);
-
-  // active
-  useEffect(() => {
-    const currentPath = window.location.pathname;
-    setActivePage(currentPath);
-  }, []);
-
-  // THIS WAS THE FIX (rename)
-  const handleScrollHideShow = () => {
-    const scrollTop = window.pageYOffset || document.documentElement.scrollTop;
-
-    if (scrollTop > lastScrollTop && scrollTop > 130) {
-      setDisplayStyle("none");
-    } else {
-      setDisplayStyle("block");
-    }
-
-    setLastScrollTop(scrollTop <= 0 ? 0 : scrollTop);
-  };
-
-  useEffect(() => {
-    if (typeof window !== "undefined") {
-      window.addEventListener("scroll", handleScrollHideShow);
-      return () => {
-        window.removeEventListener("scroll", handleScrollHideShow);
-      };
-    }
-  }, [lastScrollTop]);
-
+  // prefix logic: english = no prefix, others keep /{lang}
   const prefix = locale === "en" ? "" : `/${locale}`;
 
   const navLinks = [
@@ -66,6 +32,53 @@ const NavBar: React.FC<{ locale: string }> = ({ locale }) => {
     { href: `${prefix}/gallery`, label: navigation.links.gallery },
     { href: `${prefix}/blog`, label: navigation.links.blog },
   ];
+
+  // set initial active path on mount
+  useEffect(() => {
+    if (typeof window !== "undefined") {
+      setActivePage(window.location.pathname);
+      // set baseline lastScrollTop for consistent behavior
+      setLastScrollTop(window.pageYOffset || document.documentElement.scrollTop);
+      // ensure navbar visible on load
+      setDisplayStyle("block");
+      // preheader hidden on load
+      setIsPreheaderVisible(false);
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
+
+  // single scroll handler controlling both navbar (hide/show) and preheader
+  const handleScroll = () => {
+    const scrollTop = window.pageYOffset || document.documentElement.scrollTop;
+
+    // scrolling down
+    if (scrollTop > lastScrollTop && scrollTop > SCROLL_THRESHOLD) {
+      setDisplayStyle("none"); // hide navbar when scrolling down past threshold
+      setIsPreheaderVisible(false); // preheader stays hidden while scrolling down
+    } else {
+      // scrolling up (or not past threshold)
+      setDisplayStyle("block"); // show navbar on scroll up
+
+      if (scrollTop > SCROLL_THRESHOLD) {
+        // if still beyond threshold, show preheader when user scrolls up
+        setIsPreheaderVisible(true);
+      } else {
+        // near top, hide preheader
+        setIsPreheaderVisible(false);
+      }
+    }
+
+    setLastScrollTop(scrollTop <= 0 ? 0 : scrollTop);
+  };
+
+  // attach single unified scroll listener (applies to mobile + desktop)
+  useEffect(() => {
+    if (typeof window === "undefined") return;
+
+    window.addEventListener("scroll", handleScroll, { passive: true });
+    return () => window.removeEventListener("scroll", handleScroll);
+    // lastScrollTop intentionally left out of deps to avoid rapid rebinds; handleScroll reads latest via closure updated each render
+  }, [lastScrollTop]);
 
   const handleLinkClick = (href: string) => {
     setActivePage(href);
@@ -78,13 +91,14 @@ const NavBar: React.FC<{ locale: string }> = ({ locale }) => {
 
   return (
     <div className="fixed top-0 left-0 w-full z-50">
-      {/* Pre-header */}
-      <div className={`${isScrolled ? "block" : "hidden"} sm:block`}>
+      {/* PRE-HEADER (black top bar) */}
+      <div className={`${isPreheaderVisible ? "block" : "hidden"} sm:block`}>
         <div
           className={`bg-black text-white h-[57px] py-[14px] px-[65px] font-urbanist md:flex justify-center transition-all duration-300`}
           style={{ display: displayStyle }}
         >
           <div className="flex justify-center sm:justify-between items-center text-xs md:text-sm w-full max-w-[1270px] mx-auto">
+            {/* Contact Details */}
             <div className="hidden sm:block">
               <div className="flex gap-4">
                 <span className="flex items-center gap-2">
@@ -95,7 +109,6 @@ const NavBar: React.FC<{ locale: string }> = ({ locale }) => {
                     +91 987 318 6168
                   </a>
                 </span>
-
                 <span className="flex items-center gap-2">
                   <i className="fas fa-envelope text-[18px]" />
                   <span className="flex flex-wrap">
@@ -111,17 +124,41 @@ const NavBar: React.FC<{ locale: string }> = ({ locale }) => {
               </div>
             </div>
 
+            {/* Social Icons + Language Selector */}
             <div className="flex gap-2 items-center">
-              <a href="https://www.tripadvisor.in/Attraction_Review-g304551-d17734269-Reviews-EAZE_TOURS-New_Delhi_National_Capital_Territory_of_Delhi.html" target="_blank" rel="noopener noreferrer" className="relative w-7 h-7 flex items-center justify-center rounded-full bg-white text-black hover:bg-gray-300">
+              <a
+                href="https://www.tripadvisor.in/Attraction_Review-g304551-d17734269-Reviews-EAZE_TOURS-New_Delhi_National_Capital_Territory_of_Delhi.html"
+                target="_blank"
+                rel="noopener noreferrer"
+                className="relative w-7 h-7 flex items-center justify-center rounded-full bg-white text-black hover:bg-gray-300"
+              >
                 <i className="fab fa-tripadvisor text-sm leading-lg" />
               </a>
-              <a href="https://www.instagram.com/eazetourpackages/" target="_blank" rel="noopener noreferrer" className="relative w-7 h-7 flex items-center justify-center rounded-full bg-white text-black hover:bg-gray-300">
+
+              <a
+                href="https://www.instagram.com/eazetourpackages/"
+                target="_blank"
+                rel="noopener noreferrer"
+                className="relative w-7 h-7 flex items-center justify-center rounded-full bg-white text-black hover:bg-gray-300"
+              >
                 <i className="fab fa-instagram text-sm leading-lg" />
               </a>
-              <a href="https://www.facebook.com/eazetour/" target="_blank" rel="noopener noreferrer" className="relative w-7 h-7 flex items-center justify-center rounded-full bg-white text-black hover:bg-gray-300">
+
+              <a
+                href="https://www.facebook.com/eazetour/"
+                target="_blank"
+                rel="noopener noreferrer"
+                className="relative w-7 h-7 flex items-center justify-center rounded-full bg-white text-black hover:bg-gray-300"
+              >
                 <i className="fab fa-facebook text-sm leading-lg" />
               </a>
-              <a href="https://www.pinterest.com/eazetourpackages/" target="_blank" rel="noopener noreferrer" className="relative w-7 h-7 flex items-center justify-center rounded-full bg-white text-black hover:bg-gray-300">
+
+              <a
+                href="https://www.pinterest.com/eazetourpackages/"
+                target="_blank"
+                rel="noopener noreferrer"
+                className="relative w-7 h-7 flex items-center justify-center rounded-full bg-white text-black hover:bg-gray-300"
+              >
                 <i className="fab fa-pinterest text-sm leading-lg" />
               </a>
 
@@ -133,29 +170,29 @@ const NavBar: React.FC<{ locale: string }> = ({ locale }) => {
         </div>
       </div>
 
-      {/* Navbar */}
+      {/* NAVBAR (white) */}
       <div
         className={`flex items-center w-full font-urbanist h-[78px] bg-white text-neutral transition-all duration-300 border-b border-gray-300`}
         style={{ display: displayStyle }}
       >
-        <div
-          className="navbar flex py-[15px] items-center justify-between"
-          style={{ maxWidth: "1270px", margin: "0 auto" }}
-        >
+        <div className="navbar flex py-[15px] items-center justify-between" style={{ maxWidth: "1270px", margin: "0 auto" }}>
+          {/* Logo */}
           <div className="navbar-start px-4 flex items-center" style={{ marginTop: "-10px" }}>
             <Link href={prefix || "/"} legacyBehavior>
-              <a onClick={() => handleLinkClick(`/${locale}`)}>
+              <a onClick={() => handleLinkClick(prefix || "/")}>
                 <Image src={logo} width={128} height={48} alt="Logo" />
               </a>
             </Link>
           </div>
 
+          {/* Mobile hamburger */}
           <div className="md:hidden flex items-center pr-3 relative z-50">
             <button onClick={() => setIsMenuOpen(!isMenuOpen)} className="text-[#025C7A]">
               <i className={`fas ${isMenuOpen ? "fa-times" : "fa-bars"} text-xl`} />
             </button>
           </div>
 
+          {/* Desktop Navigation */}
           <div className="navbar-center md:flex flex-grow hidden">
             <div className="flex items-center justify-center gap-2">
               {navLinks.map((link, index) => (
@@ -171,23 +208,19 @@ const NavBar: React.FC<{ locale: string }> = ({ locale }) => {
             </div>
           </div>
 
+          {/* Mobile Sidebar */}
           <div className={`md:hidden fixed top-0 right-0 w-3/4 bg-white h-screen z-40 shadow-lg transform transition-transform duration-300 ${isMenuOpen ? "translate-x-0" : "translate-x-full"}`}>
             <div className="flex flex-col absolute top-0 text-left items-start px-4 gap-4 py-16">
               {navLinks.map((link, index) => (
                 <Link key={index} href={link.href} passHref>
-                  <button
-                    onClick={() => handleLinkClick(link.href)}
-                    className={`btn btn-ghost btn-sm rounded-btn ${activePage === link.href ? "text-[#6E9753] text-[16px]" : "text-[#025C7A] text-[16px]"}`}
-                  >
+                  <button onClick={() => handleLinkClick(link.href)} className={`btn btn-ghost btn-sm rounded-btn ${activePage === link.href ? "text-[#6E9753] text-[16px]" : "text-[#025C7A] text-[16px]"}`}>
                     {link.label}
                   </button>
                 </Link>
               ))}
 
               <Link href={`${prefix}/contact`} passHref>
-                <button
-                  className={`btn btn-ghost btn-sm text-[16px] rounded-btn ${activePage === `/${locale}/contact` ? "text-[#6E9753]" : "text-[#025C7A]"}`}
-                >
+                <button className={`btn btn-ghost btn-sm text-[16px] rounded-btn ${activePage === `${prefix}/contact` ? "text-[#6E9753]" : "text-[#025C7A]"}`} onClick={() => handleLinkClick(`${prefix}/contact`)}>
                   {navigation.links.contactUs}
                 </button>
               </Link>
@@ -198,21 +231,17 @@ const NavBar: React.FC<{ locale: string }> = ({ locale }) => {
             </div>
           </div>
 
+          {/* Contact Us Button (Desktop) */}
           <div className="navbar-end md:flex px-4 hidden">
             <Link href={`${prefix}/contact`} passHref>
-              <button
-                onClick={handleContactClick}
-                className="btn flex items-center justify-center min-w-[173px] h-[46px] rounded-[41px] bg-[#025C7A] pr-[6px] pl-[10px] hover:bg-[#6E9753]">
-                <span className="mr-2 text-white uppercase font-bold text-[16px]">
-                  {navigation.links.contactUs}
-                </span>
+              <button onClick={handleContactClick} className="btn flex items-center justify-center min-w-[173px] h-[46px] rounded-[41px] bg-[#025C7A] pr-[6px] pl-[10px] hover:bg-[#6E9753]">
+                <span className="mr-2 text-white uppercase font-bold text-[16px]">{navigation.links.contactUs}</span>
                 <span className="relative w-8 h-8 flex items-center justify-center rounded-full bg-white">
                   <i className="fas fa-arrow-right text-[#025C7A] text-lg " />
                 </span>
               </button>
             </Link>
           </div>
-
         </div>
       </div>
     </div>
