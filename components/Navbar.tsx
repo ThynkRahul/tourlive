@@ -47,15 +47,22 @@ const NavBar: React.FC<{ locale: string }> = ({ locale }) => {
     if (typeof window !== "undefined") {
       setActivePage(window.location.pathname);
       lastScrollTopRef.current = window.pageYOffset || document.documentElement.scrollTop;
-      setDisplayStyle("block"); // ensure navbar element is visible (may be transparent)
-      setIsPreheaderVisible(false); // preheader hidden initially
-      setNavbarMode("transparent"); // initial transparent for all locales per your last instruction
+      setDisplayStyle("block");
+setIsPreheaderVisible(false);
+setNavbarMode("transparent");
+
+// IMPORTANT: lock first paint so topbar never flashes initially
+document.body.setAttribute("__navbar_init_done", "1");
+
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   // Unified scroll handler controlling navbar visibility, navbar background, and preheader
   const handleScroll = () => {
+  // until 1st tick has happened → always keep transparent and no topbar
+  if (!document.body.hasAttribute("__navbar_init_done")) return;
+
     const scrollTop = window.pageYOffset || document.documentElement.scrollTop;
     const lastScrollTop = lastScrollTopRef.current;
 
