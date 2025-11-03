@@ -166,10 +166,11 @@ const navLinks = [
           {/* Logo */}
           <div className="navbar-start px-4 flex items-center" style={{ marginTop: "-10px" }}>
             <Link href={prefix || "/"} legacyBehavior>
-              <a onClick={() => handleLinkClick(`/${locale}`)}>
-                <Image src={logo} width={128} height={48} alt="Logo" />
-              </a>
-            </Link>
+  <a onClick={() => handleLinkClick(prefix || "/")}>
+    <Image src={logo} width={128} height={48} alt="Logo" />
+  </a>
+</Link>
+
           </div>
 
           {/* Hamburger Menu */}
