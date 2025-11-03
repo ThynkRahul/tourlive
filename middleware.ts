@@ -24,5 +24,9 @@ export function middleware(req: NextRequest) {
 
   // no redirect for english default - root stays english directly
   if (!pathnameHasLocale) {
-    return NextResponse.next(); // root = English
+    return NextResponse.next();
   }
+
+  // ======== DO NOT MOVE ANYTHING ABOVE HERE ========
+  // Get locale from path
+  const locale = getLocaleFromPath(pathname);
