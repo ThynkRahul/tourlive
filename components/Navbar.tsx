@@ -1,5 +1,5 @@
 "use client";
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useRef, useState } from "react";
 import Link from "next/link";
 import Image from "next/image";
 import logo from "../public/images/logo.png";
@@ -9,15 +9,26 @@ import { getLandingTranslations } from "../lib/translationHelper";
 const SCROLL_THRESHOLD = 130;
 
 const NavBar: React.FC<{ locale: string }> = ({ locale }) => {
-  // nav show/hide (white navbar)
+  // displayStyle controls whether navbar is visible ("block") or hidden ("none")
   const [displayStyle, setDisplayStyle] = useState<"block" | "none">("block");
+
   // active path for highlighting
   const [activePage, setActivePage] = useState("");
+
+  // mobile menu
   const [isMenuOpen, setIsMenuOpen] = useState(false);
-  // used to detect scroll direction
-  const [lastScrollTop, setLastScrollTop] = useState(0);
-  // preheader visibility (black top bar)
+
+  // preheader (black top bar) visibility
   const [isPreheaderVisible, setIsPreheaderVisible] = useState(false);
+
+  // navbar background mode: "transparent" (floating) or "white" (solid)
+  // Initial requirement: English (locale === 'en') starts transparent; others start white
+  const [navbarMode, setNavbarMode] = useState<"transparent" | "white">(
+    locale === "en" ? "transparent" : "white"
+  );
+
+  // last scroll top tracked in ref to avoid stale closures
+  const lastScrollTopRef = useRef<number>(0);
 
   const { navigation } = getLandingTranslations(locale);
 
@@ -37,48 +48,60 @@ const NavBar: React.FC<{ locale: string }> = ({ locale }) => {
   useEffect(() => {
     if (typeof window !== "undefined") {
       setActivePage(window.location.pathname);
-      // set baseline lastScrollTop for consistent behavior
-      setLastScrollTop(window.pageYOffset || document.documentElement.scrollTop);
-      // ensure navbar visible on load
+      // baseline last scroll for correct direction detection
+      lastScrollTopRef.current = window.pageYOffset || document.documentElement.scrollTop;
+      // ensure navbar visible initially (though may be transparent for en)
       setDisplayStyle("block");
-      // preheader hidden on load
+      // preheader hidden initially
       setIsPreheaderVisible(false);
+      // navbarMode already initialized by locale; do not force white for EN here
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
-  // single scroll handler controlling both navbar (hide/show) and preheader
+  // Unified scroll handler: controls show/hide and preheader + navbar mode changes
   const handleScroll = () => {
     const scrollTop = window.pageYOffset || document.documentElement.scrollTop;
+    const lastScrollTop = lastScrollTopRef.current;
 
-    // scrolling down
+    // Scrolling down and past threshold => hide navbar, keep preheader hidden
     if (scrollTop > lastScrollTop && scrollTop > SCROLL_THRESHOLD) {
-      setDisplayStyle("none"); // hide navbar when scrolling down past threshold
-      setIsPreheaderVisible(false); // preheader stays hidden while scrolling down
+      setDisplayStyle("none");
+      setIsPreheaderVisible(false);
+      // do not change navbarMode here (we want it to become white only when showing)
     } else {
-      // scrolling up (or not past threshold)
-      setDisplayStyle("block"); // show navbar on scroll up
+      // Scrolling up (or not past threshold) -> show navbar
+      setDisplayStyle("block");
+
+      // When we show navbar on scroll-up, it should be white (per requirement).
+      // Also, if the page is still scrolled beyond threshold, show preheader.
+      setNavbarMode("white");
 
       if (scrollTop > SCROLL_THRESHOLD) {
-        // if still beyond threshold, show preheader when user scrolls up
         setIsPreheaderVisible(true);
       } else {
-        // near top, hide preheader
         setIsPreheaderVisible(false);
+        // If we are near the top and locale is EN, keep transparent (initial behavior).
+        // However per requirement: when user scrolls up, english also becomes white.
+        // We only restore transparent when user is near top AND we haven't scrolled-up to show white.
+        // We'll keep this: if user returns to top (<= threshold), we make EN transparent again.
+        if (scrollTop <= SCROLL_THRESHOLD && locale === "en") {
+          setNavbarMode("transparent");
+        }
       }
     }
 
-    setLastScrollTop(scrollTop <= 0 ? 0 : scrollTop);
+    lastScrollTopRef.current = scrollTop <= 0 ? 0 : scrollTop;
   };
 
-  // attach single unified scroll listener (applies to mobile + desktop)
+  // attach scroll handler (applies to mobile + desktop)
   useEffect(() => {
     if (typeof window === "undefined") return;
 
     window.addEventListener("scroll", handleScroll, { passive: true });
     return () => window.removeEventListener("scroll", handleScroll);
-    // lastScrollTop intentionally left out of deps to avoid rapid rebinds; handleScroll reads latest via closure updated each render
-  }, [lastScrollTop]);
+    // we intentionally do not include lastScrollTopRef in deps
+  }, []);
 
   const handleLinkClick = (href: string) => {
     setActivePage(href);
@@ -89,9 +112,15 @@ const NavBar: React.FC<{ locale: string }> = ({ locale }) => {
     setActivePage("");
   };
 
+  // helper to compute navbar classes based on current mode
+  const navbarBgClass =
+    navbarMode === "transparent"
+      ? "bg-transparent border-none"
+      : "bg-white border-b border-gray-300";
+
   return (
     <div className="fixed top-0 left-0 w-full z-50">
-      {/* PRE-HEADER (black top bar) */}
+      {/* PRE-HEADER (black top bar). Visible only when isPreheaderVisible */}
       <div className={`${isPreheaderVisible ? "block" : "hidden"} sm:block`}>
         <div
           className={`bg-black text-white h-[57px] py-[14px] px-[65px] font-urbanist md:flex justify-center transition-all duration-300`}
@@ -109,6 +138,7 @@ const NavBar: React.FC<{ locale: string }> = ({ locale }) => {
                     +91 987 318 6168
                   </a>
                 </span>
+
                 <span className="flex items-center gap-2">
                   <i className="fas fa-envelope text-[18px]" />
                   <span className="flex flex-wrap">
@@ -124,7 +154,7 @@ const NavBar: React.FC<{ locale: string }> = ({ locale }) => {
               </div>
             </div>
 
-            {/* Social Icons + Language Selector */}
+            {/* Social Icons and Language Selector */}
             <div className="flex gap-2 items-center">
               <a
                 href="https://www.tripadvisor.in/Attraction_Review-g304551-d17734269-Reviews-EAZE_TOURS-New_Delhi_National_Capital_Territory_of_Delhi.html"
@@ -170,9 +200,9 @@ const NavBar: React.FC<{ locale: string }> = ({ locale }) => {
         </div>
       </div>
 
-      {/* NAVBAR (white) */}
+      {/* NAVBAR (white or transparent depending on navbarMode). Visible controlled by displayStyle */}
       <div
-        className={`flex items-center w-full font-urbanist h-[78px] bg-white text-neutral transition-all duration-300 border-b border-gray-300`}
+        className={`flex items-center w-full font-urbanist h-[78px] transition-all duration-300 ${navbarBgClass}`}
         style={{ display: displayStyle }}
       >
         <div className="navbar flex py-[15px] items-center justify-between" style={{ maxWidth: "1270px", margin: "0 auto" }}>
@@ -185,7 +215,7 @@ const NavBar: React.FC<{ locale: string }> = ({ locale }) => {
             </Link>
           </div>
 
-          {/* Mobile hamburger */}
+          {/* Hamburger */}
           <div className="md:hidden flex items-center pr-3 relative z-50">
             <button onClick={() => setIsMenuOpen(!isMenuOpen)} className="text-[#025C7A]">
               <i className={`fas ${isMenuOpen ? "fa-times" : "fa-bars"} text-xl`} />
@@ -209,7 +239,9 @@ const NavBar: React.FC<{ locale: string }> = ({ locale }) => {
           </div>
 
           {/* Mobile Sidebar */}
-          <div className={`md:hidden fixed top-0 right-0 w-3/4 bg-white h-screen z-40 shadow-lg transform transition-transform duration-300 ${isMenuOpen ? "translate-x-0" : "translate-x-full"}`}>
+          <div
+            className={`md:hidden fixed top-0 right-0 w-3/4 bg-white h-screen z-40 shadow-lg transform transition-transform duration-300 ${isMenuOpen ? "translate-x-0" : "translate-x-full"}`}
+          >
             <div className="flex flex-col absolute top-0 text-left items-start px-4 gap-4 py-16">
               {navLinks.map((link, index) => (
                 <Link key={index} href={link.href} passHref>
