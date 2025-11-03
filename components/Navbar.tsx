@@ -61,9 +61,58 @@ const NavBar: React.FC<{ locale: string }> = ({ locale }) => {
     <div className="fixed top-0 left-0 w-full z-50">
 
       {/* PREHEADER always present but HIDDEN at initial */}
-      <div className={`${isScrolled ? "block" : "hidden"}`}>
+      <div className={`${isScrolled ? "block" : "hidden"} sm:block`}>
+        <div
+          className={`bg-black text-white h-[57px] py-[14px] px-[65px] font-urbanist md:flex justify-center transition-all duration-300`}
+          style={{ display: displayStyle }}
+        >
+          <div className="flex justify-center sm:justify-between items-center text-xs md:text-sm w-full max-w-[1270px] mx-auto">
+            <div className="hidden sm:block">
+              <div className="flex gap-4">
+                <span className="flex items-center gap-2">
+                  <span className="relative flex items-center justify-center rounded-full bg-transparent text-white">
+                    <i className="fas fa-phone fa-flip-horizontal text-[15px]" />
+                  </span>
+                  <a href="tel:+919873186168" className="text-white text-[16px]">
+                    +91 987 318 6168
+                  </a>
+                </span>
 
-        {/* keep your preheader block EXACT same */}
+                <span className="flex items-center gap-2">
+                  <i className="fas fa-envelope text-[18px]" />
+                  <span className="flex flex-wrap">
+                    <a href="mailto:info@eazetours.com" className="text-white text-[16px]">
+                      info@eazetours.com
+                    </a>
+                    ,
+                    <a href="mailto:harshit@eazetours.com" className="text-white text-[16px] ml-1">
+                      harshit@eazetours.com
+                    </a>
+                  </span>
+                </span>
+              </div>
+            </div>
+
+            <div className="flex gap-2 items-center">
+              <a href="https://www.tripadvisor.in/Attraction_Review-g304551-d17734269-Reviews-EAZE_TOURS-New_Delhi_National_Capital_Territory_of_Delhi.html" target="_blank" rel="noopener noreferrer" className="relative w-7 h-7 flex items-center justify-center rounded-full bg-white text-black hover:bg-gray-300">
+                <i className="fab fa-tripadvisor text-sm leading-lg" />
+              </a>
+              <a href="https://www.instagram.com/eazetourpackages/" target="_blank" rel="noopener noreferrer" className="relative w-7 h-7 flex items-center justify-center rounded-full bg-white text-black hover:bg-gray-300">
+                <i className="fab fa-instagram text-sm leading-lg" />
+              </a>
+              <a href="https://www.facebook.com/eazetour/" target="_blank" rel="noopener noreferrer" className="relative w-7 h-7 flex items-center justify-center rounded-full bg-white text-black hover:bg-gray-300">
+                <i className="fab fa-facebook text-sm leading-lg" />
+              </a>
+              <a href="https://www.pinterest.com/eazetourpackages/" target="_blank" rel="noopener noreferrer" className="relative w-7 h-7 flex items-center justify-center rounded-full bg-white text-black hover:bg-gray-300">
+                <i className="fab fa-pinterest text-sm leading-lg" />
+              </a>
+
+              <div className="ml-4">
+                <LanguageSelector currentLocale={locale} variant="pre-header" />
+              </div>
+            </div>
+          </div>
+        </div>
       </div>
 
       {/* NAV BAR */}
