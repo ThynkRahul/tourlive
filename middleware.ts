@@ -21,21 +21,25 @@ export function middleware(req: NextRequest) {
   const { pathname } = req.nextUrl;
 
   // Allow all static/public files to pass through
-  if (PUBLIC_FILE.test(pathname) || pathname === "/robots.txt" || pathname === "/sitemap.xml") {
+  if (
+    PUBLIC_FILE.test(pathname) ||
+    pathname === "/robots.txt" ||
+    pathname === "/sitemap.xml"
+  ) {
     return NextResponse.next();
   }
 
-  // Check if URL already has a locale
+  // Check if URL already has locale prefix
   const pathnameHasLocale = locales.some(
-    locale => pathname.startsWith(`/${locale}/`) || pathname === `/${locale}`
+    (locale) => pathname.startsWith(`/${locale}/`) || pathname === `/${locale}`
   );
 
-  // Redirect to default locale if missing
+  // ---------- THIS IS THE CHANGE ----------
+  // no redirect for english default - root stays english directly
   if (!pathnameHasLocale) {
-    const url = req.nextUrl.clone();
-    url.pathname = `/${defaultLocale}${pathname}`;
-    return NextResponse.redirect(url);
+    return NextResponse.next(); // root = English
   }
+  // ----------------------------------------
 
   // Get locale from path
   const locale = getLocaleFromPath(pathname);
@@ -47,11 +51,14 @@ export function middleware(req: NextRequest) {
 
     // Redirect based on package ID
     if (!Number.isNaN(packageId) && packageId > 0 && packageId < 52) {
-      const tourPackage = packageData.find(p => p.Id === packageId);
+      const tourPackage = packageData.find((p) => p.Id === packageId);
       if (tourPackage && tourPackage.Uri) {
-        return NextResponse.redirect(new URL(`/${locale}/packages/${tourPackage.Uri}`, req.url), {
-          status: 308,
-        });
+        return NextResponse.redirect(
+          new URL(`/${locale}/packages/${tourPackage.Uri}`, req.url),
+          {
+            status: 308,
+          }
+        );
       }
     }
 
@@ -71,7 +78,6 @@ export function middleware(req: NextRequest) {
     }
   }
 
-  // Continue to requested page
   return NextResponse.next();
 }
 
