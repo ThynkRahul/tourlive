@@ -111,7 +111,54 @@ function Footer({ locale }: { locale: string }) {
         {/* FIFTH COLUMN same no prefix change needed */}
         <div className="md:w-[70%] w-full lg:w-[17%] mb-8 md:pt-10">
           <div className="text-lg font-semibold mb-4">Contact Us</div>
-          ... (keep same) ...
+         <div className="space-y-4">
+            <div className="flex items-start space-x-2">
+              <i className="fa fa-phone-alt text-lg -mt-1" />
+              <div>
+                <p className="text-sm">
+                  <a href="tel:+919873186168" className="hover:text-blue-600">
+                    +91 98731 86168
+                  </a>
+                </p>
+                <p className="text-sm">
+                  <a href="tel:+919911684818" className="hover:text-blue-600">
+                    +91 99116 84818
+                  </a>
+                </p>
+                <p className="text-sm">
+                  <a href="tel:+919818006830" className="hover:text-blue-600">
+                    +91 98180 06830
+                  </a>
+                </p>
+              </div>
+            </div>
+            <div className="flex items-start space-x-2">
+              <i className="far fa-envelope text-lg -mt-1" />
+              <div>
+                <p className="text-sm">
+                  <a href="mailto:info@eazetours.com;" className="hover:text-blue-600">
+                    info@eazetours.com
+                  </a>
+                </p>
+                <p className="text-sm">
+                  <a href="mailto:harshit@eazetours.com" className="hover:text-blue-600">
+                    harshit@eazetours.com
+                  </a>
+                </p>
+              </div>
+            </div>
+            <div className="flex items-start space-x-2">
+              <i className="fa fa-map-marker-alt text-lg -mt-1" />
+              <p className="text-sm">
+                <a
+                  href="https://maps.app.goo.gl/H7RTSzRAnT3WYnjr9"
+                  className="hover:text-blue-600 w-[200px]"
+                >
+                  Eaze House ~2nd Floor, RZP-146 Palam Colony, New Delhi, South West Delhi, 110075
+                </a>
+              </p>
+            </div>
+          </div>
         </div>
       </div>
 
