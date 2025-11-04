@@ -11,8 +11,7 @@ const NavBar: React.FC<{ locale: string }> = ({ locale }) => {
   const [activePage, setActivePage] = useState("");
   const [isMenuOpen, setIsMenuOpen] = useState(false);
   const [lastScrollTop, setLastScrollTop] = useState(0);
-  const [isScrolled, setIsScrolled] = useState(false); // scroll UP trigger
-  const [isHomePage, setIsHomePage] = useState(false); // NEW
+  const [isScrolled, setIsScrolled] = useState(false);  // scroll UP trigger
 
   const { navigation } = getLandingTranslations(locale);
 
@@ -22,7 +21,6 @@ const NavBar: React.FC<{ locale: string }> = ({ locale }) => {
   useEffect(() => {
     const currentPath = window.location.pathname;
     setActivePage(currentPath);
-    setIsHomePage(currentPath === "/" || currentPath === `/${locale}`); // NEW
   }, []);
 
   // detect scroll UP → show
@@ -30,7 +28,7 @@ const NavBar: React.FC<{ locale: string }> = ({ locale }) => {
     const scrollTop = window.pageYOffset || document.documentElement.scrollTop;
 
     if (scrollTop < lastScrollTop && scrollTop > 130) {
-      setIsScrolled(true); // Scroll UP show
+      setIsScrolled(true);  // Scroll UP show
     } else if (scrollTop < 130) {
       setIsScrolled(false); // initial transparent state again
     }
@@ -63,12 +61,10 @@ const NavBar: React.FC<{ locale: string }> = ({ locale }) => {
     <div className="fixed top-0 left-0 w-full z-50">
 
       {/* PREHEADER always present but HIDDEN at initial */}
-      <div className={`${isScrolled ? "block" : "hidden"}`}>
-        {/* === paste your full preheader HERE again unchanged === */}
-        <div
-          className={`bg-black text-white h-[57px] py-[14px] px-[65px] font-urbanist md:flex justify-center transition-all duration-300`}
-          style={{ display: displayStyle }}
-        >
+      
+<div className={`${isScrolled ? "block" : "hidden"}`}>
+   {/* === paste your full preheader HERE again unchanged === */}
+   <div className={`bg-black text-white h-[57px] py-[14px] px-[65px] font-urbanist md:flex justify-center transition-all duration-300`} style={{ display: displayStyle }}>
           <div className="flex justify-center sm:justify-between items-center text-xs md:text-sm w-full max-w-[1270px] mx-auto">
             <div className="hidden sm:block">
               <div className="flex gap-4">
@@ -88,10 +84,7 @@ const NavBar: React.FC<{ locale: string }> = ({ locale }) => {
                       info@eazetours.com
                     </a>
                     ,
-                    <a
-                      href="mailto:harshit@eazetours.com"
-                      className="text-white text-[16px] ml-1"
-                    >
+                    <a href="mailto:harshit@eazetours.com" className="text-white text-[16px] ml-1">
                       harshit@eazetours.com
                     </a>
                   </span>
@@ -100,36 +93,16 @@ const NavBar: React.FC<{ locale: string }> = ({ locale }) => {
             </div>
 
             <div className="flex gap-2 items-center">
-              <a
-                href="https://www.tripadvisor.in/Attraction_Review-g304551-d17734269-Reviews-EAZE_TOURS-New_Delhi_National_Capital_Territory_of_Delhi.html"
-                target="_blank"
-                rel="noopener noreferrer"
-                className="relative w-7 h-7 flex items-center justify-center rounded-full bg-white text-black hover:bg-gray-300"
-              >
+              <a href="https://www.tripadvisor.in/Attraction_Review-g304551-d17734269-Reviews-EAZE_TOURS-New_Delhi_National_Capital_Territory_of_Delhi.html" target="_blank" rel="noopener noreferrer" className="relative w-7 h-7 flex items-center justify-center rounded-full bg-white text-black hover:bg-gray-300">
                 <i className="fab fa-tripadvisor text-sm leading-lg" />
               </a>
-              <a
-                href="https://www.instagram.com/eazetourpackages/"
-                target="_blank"
-                rel="noopener noreferrer"
-                className="relative w-7 h-7 flex items-center justify-center rounded-full bg-white text-black hover:bg-gray-300"
-              >
+              <a href="https://www.instagram.com/eazetourpackages/" target="_blank" rel="noopener noreferrer" className="relative w-7 h-7 flex items-center justify-center rounded-full bg-white text-black hover:bg-gray-300">
                 <i className="fab fa-instagram text-sm leading-lg" />
               </a>
-              <a
-                href="https://www.facebook.com/eazetour/"
-                target="_blank"
-                rel="noopener noreferrer"
-                className="relative w-7 h-7 flex items-center justify-center rounded-full bg-white text-black hover:bg-gray-300"
-              >
+              <a href="https://www.facebook.com/eazetour/" target="_blank" rel="noopener noreferrer" className="relative w-7 h-7 flex items-center justify-center rounded-full bg-white text-black hover:bg-gray-300">
                 <i className="fab fa-facebook text-sm leading-lg" />
               </a>
-              <a
-                href="https://www.pinterest.com/eazetourpackages/"
-                target="_blank"
-                rel="noopener noreferrer"
-                className="relative w-7 h-7 flex items-center justify-center rounded-full bg-white text-black hover:bg-gray-300"
-              >
+              <a href="https://www.pinterest.com/eazetourpackages/" target="_blank" rel="noopener noreferrer" className="relative w-7 h-7 flex items-center justify-center rounded-full bg-white text-black hover:bg-gray-300">
                 <i className="fab fa-pinterest text-sm leading-lg" />
               </a>
 
@@ -143,23 +116,17 @@ const NavBar: React.FC<{ locale: string }> = ({ locale }) => {
 
       {/* NAV BAR */}
       <div
-        className={`flex items-center w-full font-urbanist h-[78px] transition-all duration-300 text-neutral ${
-          isHomePage
-            ? isScrolled
-              ? "bg-white border-b border-gray-300 text-[#025C7A]"
-              : "bg-transparent text-white"
-            : "bg-white border-b border-gray-300 text-[#025C7A]"
-        }`}
+        className={`flex items-center w-full font-urbanist h-[78px] ${
+          isScrolled ? "bg-white border-b border-gray-300" : "bg-transparent"
+        } transition-all duration-300 text-neutral`}
         style={{ display: displayStyle }}
       >
         <div
           className="navbar flex py-[15px] items-center justify-between"
           style={{ maxWidth: "1270px", margin: "0 auto" }}
         >
-          <div
-            className="navbar-start px-4 flex items-center"
-            style={{ marginTop: "-10px" }}
-          >
+
+          <div className="navbar-start px-4 flex items-center" style={{ marginTop: "-10px" }}>
             <Link href={prefix || "/"} legacyBehavior>
               <a onClick={() => handleLinkClick(prefix || "/")}>
                 <Image src={logo} width={128} height={48} alt="Logo" />
@@ -167,17 +134,10 @@ const NavBar: React.FC<{ locale: string }> = ({ locale }) => {
             </Link>
           </div>
 
-          {/* Mobile hamburger */}
+         {/* Mobile hamburger */}
           <div className="md:hidden flex items-center pr-3 relative z-50">
-            <button
-              onClick={() => setIsMenuOpen(!isMenuOpen)}
-              className="text-inherit"
-            >
-              <i
-                className={`fas ${
-                  isMenuOpen ? "fa-times" : "fa-bars"
-                } text-xl`}
-              />
+            <button onClick={() => setIsMenuOpen(!isMenuOpen)} className="text-[#025C7A]">
+              <i className={`fas ${isMenuOpen ? "fa-times" : "fa-bars"} text-xl`} />
             </button>
           </div>
 
@@ -188,13 +148,7 @@ const NavBar: React.FC<{ locale: string }> = ({ locale }) => {
                 <Link key={index} href={link.href} passHref>
                   <button
                     onClick={() => handleLinkClick(link.href)}
-                    className={`btn btn-ghost btn-sm rounded-btn ${
-                      activePage === link.href
-                        ? "text-[#6E9753]"
-                        : isHomePage && !isScrolled
-                        ? "text-white"
-                        : "text-[#025C7A]"
-                    } text-[16px]`}
+                    className={`btn btn-ghost btn-sm rounded-btn ${activePage === link.href ? "text-[#6E9753] text-[16px]" : "text-[#025C7A] text-[16px]"}`}
                   >
                     {link.label}
                   </button>
@@ -205,35 +159,19 @@ const NavBar: React.FC<{ locale: string }> = ({ locale }) => {
 
           {/* Mobile Sidebar */}
           <div
-            className={`md:hidden fixed top-0 right-0 w-3/4 bg-white h-screen z-40 shadow-lg transform transition-transform duration-300 ${
-              isMenuOpen ? "translate-x-0" : "translate-x-full"
-            }`}
+            className={`md:hidden fixed top-0 right-0 w-3/4 bg-white h-screen z-40 shadow-lg transform transition-transform duration-300 ${isMenuOpen ? "translate-x-0" : "translate-x-full"}`}
           >
             <div className="flex flex-col absolute top-0 text-left items-start px-4 gap-4 py-16">
               {navLinks.map((link, index) => (
                 <Link key={index} href={link.href} passHref>
-                  <button
-                    onClick={() => handleLinkClick(link.href)}
-                    className={`btn btn-ghost btn-sm rounded-btn ${
-                      activePage === link.href
-                        ? "text-[#6E9753] text-[16px]"
-                        : "text-[#025C7A] text-[16px]"
-                    }`}
-                  >
+                  <button onClick={() => handleLinkClick(link.href)} className={`btn btn-ghost btn-sm rounded-btn ${activePage === link.href ? "text-[#6E9753] text-[16px]" : "text-[#025C7A] text-[16px]"}`}>
                     {link.label}
                   </button>
                 </Link>
               ))}
 
               <Link href={`${prefix}/contact`} passHref>
-                <button
-                  className={`btn btn-ghost btn-sm text-[16px] rounded-btn ${
-                    activePage === `${prefix}/contact`
-                      ? "text-[#6E9753]"
-                      : "text-[#025C7A]"
-                  }`}
-                  onClick={() => handleLinkClick(`${prefix}/contact`)}
-                >
+                <button className={`btn btn-ghost btn-sm text-[16px] rounded-btn ${activePage === `${prefix}/contact` ? "text-[#6E9753]" : "text-[#025C7A]"}`} onClick={() => handleLinkClick(`${prefix}/contact`)}>
                   {navigation.links.contactUs}
                 </button>
               </Link>
@@ -247,29 +185,15 @@ const NavBar: React.FC<{ locale: string }> = ({ locale }) => {
           {/* Contact Us Button (Desktop) */}
           <div className="navbar-end md:flex px-4 hidden">
             <Link href={`${prefix}/contact`} passHref>
-              <button
-                onClick={handleContactClick}
-                className={`btn flex items-center justify-center min-w-[173px] h-[46px] rounded-[41px] pr-[6px] pl-[10px] ${
-                  isHomePage && !isScrolled
-                    ? "bg-white text-[#025C7A] hover:bg-[#6E9753] hover:text-white"
-                    : "bg-[#025C7A] text-white hover:bg-[#6E9753]"
-                }`}
-              >
-                <span className="mr-2 uppercase font-bold text-[16px]">
-                  {navigation.links.contactUs}
-                </span>
+              <button onClick={handleContactClick} className="btn flex items-center justify-center min-w-[173px] h-[46px] rounded-[41px] bg-[#025C7A] pr-[6px] pl-[10px] hover:bg-[#6E9753]">
+                <span className="mr-2 text-white uppercase font-bold text-[16px]">{navigation.links.contactUs}</span>
                 <span className="relative w-8 h-8 flex items-center justify-center rounded-full bg-white">
-                  <i
-                    className={`fas fa-arrow-right ${
-                      isHomePage && !isScrolled
-                        ? "text-[#025C7A]"
-                        : "text-[#025C7A]"
-                    } text-lg`}
-                  />
+                  <i className="fas fa-arrow-right text-[#025C7A] text-lg " />
                 </span>
               </button>
             </Link>
           </div>
+          
         </div>
       </div>
     </div>
