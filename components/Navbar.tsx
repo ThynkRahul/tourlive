@@ -44,7 +44,7 @@ const NavBar: React.FC<{ locale: string }> = ({ locale }) => {
     { href: `${prefix}/testimonials`, label: navigation.links.testimonials },
     { href: `${prefix}/packages`, label: navigation.links.packages },
     { href: `${prefix}/gallery`, label: navigation.links.gallery },
-    { href: `/${locale}/blog`, label: "Blog" },
+    { href: `${prefix}/blog`, label: navigation.links.blog },
   ];
 
   const handleLinkClick = (href: string) => {
