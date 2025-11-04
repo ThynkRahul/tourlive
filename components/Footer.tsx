@@ -20,7 +20,7 @@ function Footer({ locale }: { locale: string }) {
         <div className="md:w-[20%] w-full lg:w-[18%] mb-8 text-left pl-0">
 
           {/* LOGO ALWAYS → `/` english */}
-          <Link href="/" passHref>
+         <Link href={prefix || "/"} passHref>
             <Image
               className="z-0 mb-4 md:mx-0"
               src={signature}
