@@ -133,7 +133,10 @@ export default function RootLayout({
         <CanonicalURL />
 
         {/* Conditional Navbar */}
-        {pathname === `/${lang}` ? <LandingNavBar locale={lang} /> : <NavBar locale={lang} />}
+        {/* pathname === `/${lang}` ? <LandingNavBar locale={lang} /> : <NavBar locale={lang} /> */}
+
+        {/* Conditional Navbar */}
+        { (lang === "en" ? pathname === "/" : pathname === `/${lang}`) ? <LandingNavBar locale={lang} /> : <NavBar locale={lang} /> }
 
         <main>{children}</main>
 
